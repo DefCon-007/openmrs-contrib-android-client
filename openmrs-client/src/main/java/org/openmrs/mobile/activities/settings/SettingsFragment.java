@@ -23,11 +23,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.openmrs.mobile.R;
 import org.openmrs.mobile.activities.ACBaseFragment;
 import org.openmrs.mobile.models.SettingsListItemDTO;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +43,7 @@ public class SettingsFragment extends ACBaseFragment<SettingsContract.Presenter>
     private List<SettingsListItemDTO> mListItem = new ArrayList<>();
 
     private RecyclerView settingsRecyclerView;
-
+    private TextView mlogsTV;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -57,7 +64,25 @@ public class SettingsFragment extends ACBaseFragment<SettingsContract.Presenter>
     }
 
     @Override
-    public void addLogsInfo(long logSize, String logFilename) {
+    public void addLogsInfo(long logSize, String logFilename , TextView logsTV) {
+        mlogsTV = logsTV;
+        String aBuffer = "";
+        try {
+            File myFile = new File(logFilename);
+            FileInputStream fIn = new FileInputStream(myFile);
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+            String aDataRow;
+            while ((aDataRow = myReader.readLine()) != null) {
+                aBuffer += aDataRow;
+            }
+            myReader.close();
+            mlogsTV.setText(aBuffer);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         mListItem.add(new SettingsListItemDTO(getResources().getString(R.string.settings_logs),
                 logFilename,
                 "Size: " + logSize + "kB"));
@@ -88,7 +113,7 @@ public class SettingsFragment extends ACBaseFragment<SettingsContract.Presenter>
 
     @Override
     public void applyChanges() {
-        SettingsRecyclerViewAdapter adapter = new SettingsRecyclerViewAdapter(mListItem);
+        SettingsRecyclerViewAdapter adapter = new SettingsRecyclerViewAdapter(mListItem,mlogsTV);
         settingsRecyclerView.setAdapter(adapter);
     }
 

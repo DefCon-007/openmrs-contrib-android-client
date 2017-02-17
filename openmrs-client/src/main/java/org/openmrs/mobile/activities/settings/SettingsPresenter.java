@@ -15,6 +15,7 @@
 package org.openmrs.mobile.activities.settings;
 
 import android.support.annotation.NonNull;
+import android.widget.TextView;
 
 import org.openmrs.mobile.activities.BasePresenter;
 import org.openmrs.mobile.application.OpenMRS;
@@ -31,10 +32,11 @@ public class SettingsPresenter extends BasePresenter implements SettingsContract
 
     @NonNull
     private final OpenMRSLogger mOpenMRSLogger;
-
-    public SettingsPresenter(@NonNull SettingsContract.View view, @NonNull OpenMRSLogger logger) {
+    private TextView mlogsTV;
+    public SettingsPresenter(@NonNull SettingsContract.View view, @NonNull OpenMRSLogger logger , TextView logsView) {
         mSettingsView = view;
         mOpenMRSLogger = logger;
+        mlogsTV = logsView;
         view.setPresenter(this);
     }
 
@@ -55,8 +57,7 @@ public class SettingsPresenter extends BasePresenter implements SettingsContract
         } catch (Exception e) {
             mOpenMRSLogger.w("File not found");
         }
-
-        mSettingsView.addLogsInfo(size, filename);
+        mSettingsView.addLogsInfo(size, filename,mlogsTV);
         mSettingsView.addBuildVersionInfo();
         mSettingsView.applyChanges();
     }

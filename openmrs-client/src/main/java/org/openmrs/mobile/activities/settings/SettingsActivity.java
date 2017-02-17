@@ -16,13 +16,16 @@ package org.openmrs.mobile.activities.settings;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.test.suitebuilder.TestMethod;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import org.openmrs.mobile.R;
 import org.openmrs.mobile.activities.ACBaseActivity;
 public class SettingsActivity extends ACBaseActivity {
-
+    private TextView logsTV;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,9 +46,9 @@ public class SettingsActivity extends ACBaseActivity {
             addFragmentToActivity(getSupportFragmentManager(),
                     settingsFragment, R.id.settingsContentFrame);
         }
-
+        logsTV = (TextView) findViewById(R.id.logsTextView);
         // Create the presenter
-        new SettingsPresenter(settingsFragment, mOpenMRSLogger);
+        new SettingsPresenter(settingsFragment, mOpenMRSLogger,logsTV);
 
     }
 
@@ -69,4 +72,13 @@ public class SettingsActivity extends ACBaseActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (logsTV.getVisibility() == View.VISIBLE){
+            logsTV.setVisibility(View.GONE);
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
 }
