@@ -22,22 +22,31 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import org.openmrs.mobile.R;
 import org.openmrs.mobile.activities.dialog.CustomFragmentDialog;
 import org.openmrs.mobile.activities.dialog.DialogActivity;
+import org.openmrs.mobile.activities.login.LocationArrayAdapter;
 import org.openmrs.mobile.activities.login.LoginActivity;
 import org.openmrs.mobile.activities.settings.SettingsActivity;
 import org.openmrs.mobile.application.OpenMRS;
 import org.openmrs.mobile.application.OpenMRSLogger;
 import org.openmrs.mobile.bundle.CustomDialogBundle;
+import org.openmrs.mobile.dao.LocationDAO;
 import org.openmrs.mobile.databases.OpenMRSDBOpenHelper;
+import org.openmrs.mobile.models.Location;
 import org.openmrs.mobile.net.AuthorizationManager;
 import org.openmrs.mobile.utilities.ApplicationConstants;
 import org.openmrs.mobile.utilities.ToastUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,7 +58,10 @@ public abstract class ACBaseActivity extends AppCompatActivity {
     private CustomFragmentDialog mCurrentDialog;
     protected AuthorizationManager mAuthorizationManager;
     protected CustomFragmentDialog mCustomFragmentDialog;
+    private LocationDAO locationDAO;
     private MenuItem mSyncbutton;
+    private MenuItem mSessionLocation;
+    private Spinner mlocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +103,12 @@ public abstract class ACBaseActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         mSyncbutton = menu.findItem(R.id.syncbutton);
+        mSessionLocation = menu.findItem(R.id.sessionLocation);
+        mlocations = (Spinner) MenuItemCompat.getActionView(mSessionLocation);
+        List<String> items = getLocationStringList((List<Location>) locationDAO.getLocations());
+        final LocationArrayAdapter adapter = new LocationArrayAdapter(this, items);
+
+        mlocations.setAdapter(adapter);
         MenuItem logoutMenuItem = menu.findItem(R.id.actionLogout);
         if (logoutMenuItem != null) {
             logoutMenuItem.setTitle(getString(R.string.action_logout) + " " + mOpenMRS.getUsername());
@@ -100,8 +118,22 @@ public abstract class ACBaseActivity extends AppCompatActivity {
             final Boolean syncState = prefs.getBoolean("sync", true);
             setSyncButtonState(syncState);
         }
+        if (mSessionLocation != null){
+
+        }
         return true;
     }
+
+    private List<String> getLocationStringList(List<Location> locationList) {
+        List<String> list = new ArrayList<String>();
+        list.add(getString(R.string.login_location_select));
+        for (int i = 0; i < locationList.size(); i++) {
+            list.add(locationList.get(i).getDisplay());
+        }
+        return list;
+    }
+
+
 
     private void setSyncButtonState(boolean syncState) {
         if (syncState) {
