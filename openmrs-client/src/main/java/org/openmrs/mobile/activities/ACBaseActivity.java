@@ -49,7 +49,7 @@ public abstract class ACBaseActivity extends AppCompatActivity {
     protected final OpenMRSLogger mOpenMRSLogger = mOpenMRS.getOpenMRSLogger();
     protected AuthorizationManager mAuthorizationManager;
     protected CustomFragmentDialog mCustomFragmentDialog;
-    private MenuItem mSyncbutton;
+    private MenuItem mSyncbutton,mAddPatientMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +83,16 @@ public abstract class ACBaseActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         mSyncbutton = menu.findItem(R.id.syncbutton);
+        mAddPatientMenuItem = menu.findItem(R.id.actionAddPatients);
         MenuItem logoutMenuItem = menu.findItem(R.id.actionLogout);
         if (logoutMenuItem != null) {
             logoutMenuItem.setTitle(getString(R.string.action_logout) + " " + mOpenMRS.getUsername());
         }
         if(mSyncbutton !=null) {
             final Boolean syncState = NetworkUtils.isOnline();
+            if (mAddPatientMenuItem != null){
+                enableAddPatient(syncState);
+            }
             setSyncButtonState(syncState);
         }
         return true;
@@ -124,18 +128,27 @@ public abstract class ACBaseActivity extends AppCompatActivity {
                 if (syncState) {
                     OpenMRS.getInstance().setSyncState(false);
                     setSyncButtonState(false);
+                    enableAddPatient(false);
                 } else if(NetworkUtils.hasNetwork()){
                     OpenMRS.getInstance().setSyncState(true);
                     setSyncButtonState(true);
+                    enableAddPatient(true);
                     Intent intent = new Intent("org.openmrs.mobile.intent.action.SYNC_PATIENTS");
                     getApplicationContext().sendBroadcast(intent);
                 } else {
+                    enableAddPatient(false);
                     showNoInternetConnectionSnackbar();
                 }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void enableAddPatient(boolean enabled) {
+        int resId = enabled ? R.drawable.ic_add : R.drawable.ic_add_disabled;
+        mAddPatientMenuItem.setEnabled(enabled);
+        mAddPatientMenuItem.setIcon(resId);
     }
 
     private void showNoInternetConnectionSnackbar() {
