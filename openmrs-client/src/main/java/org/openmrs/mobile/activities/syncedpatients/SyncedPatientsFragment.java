@@ -14,11 +14,15 @@
 
 package org.openmrs.mobile.activities.syncedpatients;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -26,6 +30,8 @@ import android.widget.TextView;
 
 import org.openmrs.mobile.R;
 import org.openmrs.mobile.activities.ACBaseFragment;
+import org.openmrs.mobile.activities.lastviewedpatients.LastViewedPatientsActivity;
+import org.openmrs.mobile.application.OpenMRS;
 import org.openmrs.mobile.models.Patient;
 import org.openmrs.mobile.utilities.FontsUtil;
 
@@ -37,6 +43,9 @@ public class SyncedPatientsFragment extends ACBaseFragment<SyncedPatientsContrac
     // Fragment components
     private TextView mEmptyList;
     private RecyclerView mSyncedPatientRecyclerView;
+
+    //Menu Items
+    private MenuItem mAddPatientMenuItem;
 
     //Initialization Progress bar
     private ProgressBar mProgressBar;
@@ -61,7 +70,27 @@ public class SyncedPatientsFragment extends ACBaseFragment<SyncedPatientsContrac
         // Font config
         FontsUtil.setFont((ViewGroup) this.getActivity().findViewById(android.R.id.content));
 
+        setHasOptionsMenu(true);
+
         return root;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.syncbutton:
+                enableAddPatient(OpenMRS.getInstance().getSyncState());
+                break;
+            case R.id.actionAddPatients:
+                Intent intent = new Intent(getActivity(), LastViewedPatientsActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                // Do nothing
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -103,6 +132,21 @@ public class SyncedPatientsFragment extends ACBaseFragment<SyncedPatientsContrac
             mEmptyList.setText(getString(R.string.search_patient_no_result_for_query, replacementWord));
         }
     }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        super.onCreateOptionsMenu(menu, menuInflater);
+        mAddPatientMenuItem = menu.findItem(R.id.actionAddPatients);
+        enableAddPatient(OpenMRS.getInstance().getSyncState());
+    }
+
+    private void enableAddPatient(boolean enabled) {
+        int resId = enabled ? R.drawable.ic_add : R.drawable.ic_add_disabled;
+        mAddPatientMenuItem.setEnabled(enabled);
+        mAddPatientMenuItem.setIcon(resId);
+    }
+
 
     /**
      * @return New instance of SyncedPatientsFragment
