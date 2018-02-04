@@ -26,7 +26,7 @@ android {
     def travisBuildNumber = System.getenv("TRAVIS_BUILD_NUMBER")
     def buildNumber = (travisBuildNumber) ? (travisBuildNumber as int) : 1
 
-    def applicationVersion = version;
+    def applicationVersion = version
     def travisTag = System.getenv("TRAVIS_TAG")
     def buildVersionName = (travisTag) ? travisTag : applicationVersion + "-debug." + buildNumber
 
